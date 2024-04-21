@@ -6,6 +6,7 @@ interface Vars {
   groundx: number;
   Gap: number;
   speed: number;
+  gameStatus: "start" | "playing" | "gameover";
 }
 interface BirdY {
   birdY: number;
@@ -30,12 +31,14 @@ function App() {
   const birdRef = React.useRef<HTMLImageElement>(null);
   const pipeUpRef = React.useRef<HTMLImageElement>(null);
   const pipeDownRef = React.useRef<HTMLImageElement>(null);
+  const restartRef = React.useRef<HTMLImageElement>(null);
   const [vars, setVars] = useState({
     canvawith: 500,
     canvahight: 600,
     groundx: 0,
     Gap: 250,
     speed: 4,
+    gameStatus: "start" as "start" | "playing" | "gameover",
   });
   const birdX = React.useRef<number>(0);
   const birdY = React.useRef<BirdY>({
@@ -143,19 +146,6 @@ function App() {
         skyRef.current!.height
       );
 
-      ctx.drawImage(
-        birdRef.current!,
-        birdX.current,
-        // 0,
-        0,
-        69,
-        48,
-        vars.canvawith / 2 - 24,
-        vars.canvahight / 2 - 24 + birdY.current.birdY,
-        50,
-        40
-      );
-
       // Move to the next frame
       frameCount.current++;
       if (frameCount.current < 100) {
@@ -183,14 +173,6 @@ function App() {
           pipe.bottomy = PipesHeight[1];
         }
       });
-      if (frameCount.current % 7 === 0) {
-        birdX.current += 69;
-
-        // If the last frame is reached, reset to the first frame
-        if (birdX.current >= birdRef.current!.width) {
-          birdX.current = 0;
-        }
-      }
 
       // draw pipes
       pipes.forEach((pipe) => {
@@ -223,6 +205,46 @@ function App() {
       if (vars.groundx < -vars.canvawith + 17) {
         vars.groundx = 0;
       }
+      if (vars.gameStatus === "gameover") {
+        ctx.drawImage(
+          restartRef.current!,
+          vars.canvawith / 3 + 30,
+          (vars.canvahight / 5) * 3,
+          100,
+          50
+        );
+        return;
+      }
+
+      ctx.drawImage(
+        birdRef.current!,
+        birdX.current,
+        // 0,
+        0,
+        69,
+        48,
+        vars.canvawith / 2 - 24,
+        vars.canvahight / 2 - 24 + birdY.current.birdY,
+        50,
+        40
+      );
+
+      if (frameCount.current % 7 === 0) {
+        birdX.current += 69;
+
+        // If the last frame is reached, reset to the first frame
+        if (birdX.current >= birdRef.current!.width) {
+          birdX.current = 0;
+        }
+      }
+      // check if the bird hit the ground
+      if (
+        vars.canvahight / 2 - 24 + birdY.current.birdY > 450 ||
+        vars.canvahight / 2 - 24 + birdY.current.birdY < 1
+      ) {
+        vars.gameStatus = "gameover";
+      }
+
       // }
       requestAnimationFrame(() => animate(ctx, canva, vars, pipes));
     }
@@ -267,6 +289,7 @@ function App() {
       <img ref={birdRef} src="bird2.png" style={{ display: "none" }} />
       <img ref={pipeUpRef} src="PipeUp.png" style={{ display: "none" }} />
       <img ref={pipeDownRef} src="PipeDown.png" style={{ display: "none" }} />
+      <img ref={restartRef} src="restart.png" style={{ display: "none" }} />
     </main>
   );
 }
