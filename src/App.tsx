@@ -7,6 +7,8 @@ interface Vars {
   Gap: number;
   speed: number;
   gameStatus: "start" | "playing" | "gameover";
+  score: number;
+  bestScore: number;
 }
 interface BirdY {
   birdY: number;
@@ -32,6 +34,7 @@ function App() {
   const pipeUpRef = React.useRef<HTMLImageElement>(null);
   const pipeDownRef = React.useRef<HTMLImageElement>(null);
   const restartRef = React.useRef<HTMLImageElement>(null);
+  const scoreRef = React.useRef<HTMLImageElement>(null);
   const [vars, setVars] = useState({
     canvawith: 500,
     canvahight: 600,
@@ -39,6 +42,8 @@ function App() {
     Gap: 250,
     speed: 4,
     gameStatus: "start" as "start" | "playing" | "gameover",
+    score: 5,
+    bestScore: 0,
   });
   const birdX = React.useRef<number>(0);
   const birdY = React.useRef<BirdY>({
@@ -213,6 +218,24 @@ function App() {
           100,
           50
         );
+        ctx.drawImage(
+          scoreRef.current!,
+          vars.canvawith / 3 + 10,
+          vars.canvahight / 5,
+          140,
+          160
+        );
+        ctx.font = "30px bayside";
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "black";
+
+        ctx.lineWidth = 2;
+        ctx.strokeText(vars.bestScore.toString(), vars.canvawith / 3 + 70, 251);
+        ctx.strokeText(vars.score.toString(), vars.canvawith / 3 + 70, 191);
+        ctx.font = "28px bayside";
+        ctx.fillText(vars.score.toString(), vars.canvawith / 3 + 70, 190);
+
+        ctx.fillText(vars.bestScore.toString(), vars.canvawith / 3 + 70, 250);
         return;
       }
 
@@ -290,6 +313,7 @@ function App() {
       <img ref={pipeUpRef} src="PipeUp.png" style={{ display: "none" }} />
       <img ref={pipeDownRef} src="PipeDown.png" style={{ display: "none" }} />
       <img ref={restartRef} src="restart.png" style={{ display: "none" }} />
+      <img ref={scoreRef} src="score.png" style={{ display: "none" }} />
     </main>
   );
 }
