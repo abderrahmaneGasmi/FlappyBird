@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-
+interface Vars {
+  canvawith: number;
+  canvahight: number;
+  groundx: number;
+}
 function App() {
   const [canva, setcanva] = useState<HTMLCanvasElement | null>(null);
   const [ctx, setctx] = useState<CanvasRenderingContext2D | null>(null);
   const [loading, setLoading] = useState(true);
+  const groundRef = React.useRef<HTMLImageElement>(null);
   const [vars, setVars] = useState({
     canvawith: 500,
     canvahight: 600,
+    groundx: 0,
   });
   const box = React.useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -34,23 +40,53 @@ function App() {
           ctx.fillRect(0, 0, canva.width, canva.height);
           const sky = new Image();
           sky.src = "/sky.png";
-          const land = new Image();
-          land.src = "/land.png";
-          land.onload = () => {
+
+          const groundwidth = 37;
+          // repeat the ground image to fill the canvas width
+          for (let i = 0; i < vars.canvawith / groundwidth; i++) {
             ctx.drawImage(
-              land,
-              0,
-              vars.canvahight - land.height,
-              vars.canvawith,
-              land.height
+              groundRef.current!,
+              i * groundwidth,
+              vars.canvahight - 112
             );
-          };
+          }
+
           sky.onload = () => {
             ctx.drawImage(sky, 0, 390, vars.canvawith, sky.height);
           };
           setLoading(false);
+
+          animate(ctx, canva, vars);
         }
       }
+    }
+    function animate(
+      ctx: CanvasRenderingContext2D,
+      canva: HTMLCanvasElement,
+      vars: Vars
+    ) {
+      ctx.clearRect(0, 0, canva.width, canva.height);
+      ctx.fillStyle = "#1dc5cd";
+      ctx.fillRect(0, 0, canva.width, canva.height);
+      const sky = new Image();
+      const groundwidth = 37;
+      // repeat the ground image to fill the canvas width
+      for (let i = 0; i < (vars.canvawith / groundwidth) * 2; i++) {
+        ctx.drawImage(
+          groundRef.current!,
+          i * groundwidth + vars.groundx,
+          vars.canvahight - 112
+        );
+      }
+      sky.onload = () => {
+        ctx.drawImage(sky, 0, 390, vars.canvawith, sky.height);
+      };
+      vars.groundx -= 2;
+      if (vars.groundx < -vars.canvawith + 17) {
+        vars.groundx = 0;
+      }
+      // }
+      requestAnimationFrame(() => animate(ctx, canva, vars));
     }
   }, [canva, ctx, vars]);
   return (
@@ -76,6 +112,7 @@ function App() {
           width: vars.canvawith,
         }}
       ></div>
+      <img ref={groundRef} src="ground.png" style={{ display: "none" }} />
     </main>
   );
 }
