@@ -99,11 +99,13 @@ function App() {
           posy < (vars.canvahight / 5) * 3 + 50
         ) {
           frameCount.current = 0;
-
+          birdY.current.birdY = -5;
           setVars({
             ...vars,
             gameStatus: "start",
           });
+          curentpipeindex.current = 0;
+          frameCount.current = 0;
           score.current!.score = 0;
           setPipes([
             {
