@@ -7,8 +7,6 @@ interface Vars {
   Gap: number;
   speed: number;
   gameStatus: "start" | "playing" | "gameover";
-  score: number;
-  bestScore: number;
 }
 interface BirdY {
   birdY: number;
@@ -24,6 +22,10 @@ interface Pipe {
   toph: number;
   bottomh: number;
 }
+interface Score {
+  score: number;
+  bestScore: number;
+}
 function App() {
   const [canva, setcanva] = useState<HTMLCanvasElement | null>(null);
   const [ctx, setctx] = useState<CanvasRenderingContext2D | null>(null);
@@ -35,6 +37,7 @@ function App() {
   const pipeDownRef = React.useRef<HTMLImageElement>(null);
   const restartRef = React.useRef<HTMLImageElement>(null);
   const scoreRef = React.useRef<HTMLImageElement>(null);
+  const curentpipeindex = React.useRef<number>(0);
   const [vars, setVars] = useState({
     canvawith: 500,
     canvahight: 600,
@@ -42,10 +45,12 @@ function App() {
     Gap: 250,
     speed: 4,
     gameStatus: "start" as "start" | "playing" | "gameover",
-    score: 5,
-    bestScore: 0,
   });
   const birdX = React.useRef<number>(0);
+  const score = React.useRef<Score>({
+    score: 0,
+    bestScore: 0,
+  });
   const birdY = React.useRef<BirdY>({
     birdY: -5,
     dir: "down",
@@ -98,8 +103,8 @@ function App() {
           setVars({
             ...vars,
             gameStatus: "start",
-            score: 0,
           });
+          score.current!.score = 0;
           setPipes([
             {
               topx: vars.Gap * 3,
@@ -127,6 +132,13 @@ function App() {
             },
           ]);
         }
+        return;
+      }
+      if (vars.gameStatus === "start") {
+        setVars({
+          ...vars,
+          gameStatus: "playing",
+        });
       }
 
       birdY.current.velocity = -1 * vars.speed;
@@ -187,8 +199,8 @@ function App() {
       ctx.fillStyle = "#1dc5cd";
       ctx.fillRect(0, 0, canva.width, canva.height);
       const groundwidth = 37;
-      // repeat the ground image to fill the canvas width
 
+      // sky image
       ctx.drawImage(
         skyRef.current!,
         0,
@@ -199,7 +211,7 @@ function App() {
 
       // Move to the next frame
       frameCount.current++;
-      if (frameCount.current < 100) {
+      if (vars.gameStatus === "start") {
         if (frameCount.current % 2 === 0) {
           birdY.current.birdY += birdY.current.dir === "down" ? 1 : -1;
           if (birdY.current.birdY > 10) {
@@ -213,17 +225,19 @@ function App() {
         birdY.current.birdY += birdY.current.velocity;
         birdY.current.velocity += birdY.current.gravity;
       }
-      pipes.forEach((pipe) => {
-        pipe.topx -= 2;
-        pipe.bottomx -= 2;
-        if (pipe.topx < -50) {
-          pipe.topx = vars.canvawith + vars.Gap;
-          pipe.bottomx = vars.canvawith + vars.Gap;
-          const PipesHeight = generateRandomPairIn();
-          pipe.toph = PipesHeight[0];
-          pipe.bottomy = PipesHeight[1];
-        }
-      });
+      // move pipes
+      if (vars.gameStatus === "playing")
+        pipes.forEach((pipe) => {
+          pipe.topx -= 2;
+          pipe.bottomx -= 2;
+          if (pipe.topx < -50) {
+            pipe.topx = vars.canvawith + vars.Gap;
+            pipe.bottomx = vars.canvawith + vars.Gap;
+            const PipesHeight = generateRandomPairIn();
+            pipe.toph = PipesHeight[0];
+            pipe.bottomy = PipesHeight[1];
+          }
+        });
 
       // draw pipes
       pipes.forEach((pipe) => {
@@ -245,6 +259,23 @@ function App() {
           pipe.bottomh + pipeDownRef.current!.height
         );
       });
+      ctx.font = "30px bayside";
+      ctx.fillStyle = "white";
+      ctx.strokeStyle = "black";
+
+      ctx.lineWidth = 2;
+      ctx.strokeText(
+        score.current!.score.toString(),
+        vars.canvawith / 3 + 70,
+        50
+      );
+      ctx.font = "28px bayside";
+      ctx.fillText(
+        score.current!.score.toString(),
+        vars.canvawith / 3 + 70,
+        51
+      );
+      // draw ground
       for (let i = 0; i < (vars.canvawith / groundwidth) * 2; i++) {
         ctx.drawImage(
           groundRef.current!,
@@ -252,10 +283,13 @@ function App() {
           vars.canvahight - 112
         );
       }
+      // move the ground
       vars.groundx -= 2;
       if (vars.groundx < -vars.canvawith + 17) {
         vars.groundx = 0;
       }
+
+      // draw score and best score
       if (vars.gameStatus === "gameover") {
         ctx.drawImage(
           restartRef.current!,
@@ -276,15 +310,32 @@ function App() {
         ctx.strokeStyle = "black";
 
         ctx.lineWidth = 2;
-        ctx.strokeText(vars.bestScore.toString(), vars.canvawith / 3 + 70, 251);
-        ctx.strokeText(vars.score.toString(), vars.canvawith / 3 + 70, 191);
+        ctx.strokeText(
+          score.current!.bestScore.toString(),
+          vars.canvawith / 3 + 70,
+          251
+        );
+        ctx.strokeText(
+          score.current!.score.toString(),
+          vars.canvawith / 3 + 70,
+          191
+        );
         ctx.font = "28px bayside";
-        ctx.fillText(vars.score.toString(), vars.canvawith / 3 + 70, 190);
+        ctx.fillText(
+          score.current!.score.toString(),
+          vars.canvawith / 3 + 70,
+          190
+        );
 
-        ctx.fillText(vars.bestScore.toString(), vars.canvawith / 3 + 70, 250);
+        ctx.fillText(
+          score.current!.bestScore.toString(),
+          vars.canvawith / 3 + 70,
+          250
+        );
         return;
       }
 
+      // draw bird
       ctx.drawImage(
         birdRef.current!,
         birdX.current,
@@ -298,6 +349,7 @@ function App() {
         40
       );
 
+      // add bird animation
       if (frameCount.current % 7 === 0) {
         birdX.current += 69;
 
@@ -315,22 +367,32 @@ function App() {
       }
 
       // check if the bird hit the pipes
-      pipes.forEach((pipe) => {
-        if (
-          vars.canvawith / 2 - 24 + birdX.current > pipe.topx &&
-          vars.canvawith / 2 - 24 < pipe.topx + 50 &&
-          vars.canvahight / 2 - 24 + birdY.current.birdY < pipe.toph
-        ) {
-          vars.gameStatus = "gameover";
+
+      const pipe = pipes[curentpipeindex.current];
+
+      if (
+        vars.canvahight / 2 - 24 + birdY.current.birdY < pipe.toph &&
+        vars.canvawith / 2 - 24 + 48 > pipe.topx &&
+        vars.canvawith / 2 - 24 + 48 < pipe.topx + 50
+      ) {
+        vars.gameStatus = "gameover";
+      }
+      if (
+        vars.canvahight / 2 - 24 + birdY.current.birdY + 40 > pipe.bottomy &&
+        vars.canvawith / 2 - 24 + 48 > pipe.bottomx &&
+        vars.canvawith / 2 - 24 < pipe.bottomx + 50
+      ) {
+        vars.gameStatus = "gameover";
+      }
+
+      if (vars.canvawith / 2 - 24 + 48 > pipe.topx + 50) {
+        score.current!.score++;
+        if (score.current!.score > score.current!.bestScore) {
+          score.current!.bestScore = score.current!.score;
         }
-        if (
-          vars.canvawith / 2 - 24 + birdX.current > pipe.bottomx &&
-          vars.canvawith / 2 - 24 < pipe.bottomx + 50 &&
-          vars.canvahight / 2 - 24 + birdY.current.birdY + 40 > pipe.bottomy
-        ) {
-          vars.gameStatus = "gameover";
-        }
-      });
+        curentpipeindex.current = (curentpipeindex.current + 1) % pipes.length;
+      }
+
       requestAnimationFrame(() => animate(ctx, canva, vars, pipes));
     }
     return () => {
