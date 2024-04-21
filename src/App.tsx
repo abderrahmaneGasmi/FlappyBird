@@ -268,7 +268,23 @@ function App() {
         vars.gameStatus = "gameover";
       }
 
-      // }
+      // check if the bird hit the pipes
+      pipes.forEach((pipe) => {
+        if (
+          vars.canvawith / 2 - 24 + birdX.current > pipe.topx &&
+          vars.canvawith / 2 - 24 < pipe.topx + 50 &&
+          vars.canvahight / 2 - 24 + birdY.current.birdY < pipe.toph
+        ) {
+          vars.gameStatus = "gameover";
+        }
+        if (
+          vars.canvawith / 2 - 24 + birdX.current > pipe.bottomx &&
+          vars.canvawith / 2 - 24 < pipe.bottomx + 50 &&
+          vars.canvahight / 2 - 24 + birdY.current.birdY + 40 > pipe.bottomy
+        ) {
+          vars.gameStatus = "gameover";
+        }
+      });
       requestAnimationFrame(() => animate(ctx, canva, vars, pipes));
     }
     return () => {
