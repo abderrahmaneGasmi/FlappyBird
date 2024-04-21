@@ -82,7 +82,53 @@ function App() {
   const frameCount = React.useRef<number>(0);
   useEffect(() => {
     const boxC = box.current;
-    const handleclick = () => {
+    const handleclick = (e: MouseEvent) => {
+      if (vars.gameStatus === "gameover") {
+        const posx = e.clientX - boxC!.getBoundingClientRect().left;
+        const posy = e.clientY - boxC!.getBoundingClientRect().top;
+
+        if (
+          posx > vars.canvawith / 3 + 30 &&
+          posx < vars.canvawith / 3 + 130 &&
+          posy > (vars.canvahight / 5) * 3 &&
+          posy < (vars.canvahight / 5) * 3 + 50
+        ) {
+          frameCount.current = 0;
+
+          setVars({
+            ...vars,
+            gameStatus: "start",
+            score: 0,
+          });
+          setPipes([
+            {
+              topx: vars.Gap * 3,
+              topy: 0,
+              toph: 250,
+              bottomx: vars.Gap * 3,
+              bottomy: 350,
+              bottomh: 200,
+            },
+            {
+              topx: 4 * vars.Gap,
+              topy: 0,
+              toph: 250,
+              bottomx: 4 * vars.Gap,
+              bottomy: 350,
+              bottomh: 200,
+            },
+            {
+              topx: vars.Gap * 5,
+              topy: 0,
+              toph: 250,
+              bottomx: vars.Gap * 5,
+              bottomy: 350,
+              bottomh: 200,
+            },
+          ]);
+        }
+      }
+
       birdY.current.velocity = -1 * vars.speed;
     };
     boxC!.addEventListener("click", handleclick);
