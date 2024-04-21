@@ -5,9 +5,12 @@ interface Vars {
   canvahight: number;
   groundx: number;
   Gap: number;
+  speed: number;
 }
 interface BirdY {
   birdY: number;
+  velocity: number;
+  gravity: number;
   dir: "up" | "down";
 }
 interface Pipe {
@@ -32,11 +35,14 @@ function App() {
     canvahight: 600,
     groundx: 0,
     Gap: 250,
+    speed: 4,
   });
   const birdX = React.useRef<number>(0);
   const birdY = React.useRef<BirdY>({
     birdY: -5,
     dir: "down",
+    velocity: 0,
+    gravity: 0.25, // Adjust this value to change gravity
   });
   const [pipes, setPipes] = useState<Array<Pipe>>([
     {
@@ -67,6 +73,11 @@ function App() {
   const box = React.useRef<HTMLDivElement>(null);
   const frameCount = React.useRef<number>(0);
   useEffect(() => {
+    const boxC = box.current;
+    const handleclick = () => {
+      birdY.current.velocity = -1 * vars.speed;
+    };
+    boxC!.addEventListener("click", handleclick);
     if (box.current) {
       // check if the box is already has a canvas
 
@@ -147,14 +158,19 @@ function App() {
 
       // Move to the next frame
       frameCount.current++;
-      if (frameCount.current % 2 === 0) {
-        birdY.current.birdY += birdY.current.dir === "down" ? 1 : -1;
-        if (birdY.current.birdY > 10) {
-          birdY.current.dir = "up";
+      if (frameCount.current < 100) {
+        if (frameCount.current % 2 === 0) {
+          birdY.current.birdY += birdY.current.dir === "down" ? 1 : -1;
+          if (birdY.current.birdY > 10) {
+            birdY.current.dir = "up";
+          }
+          if (birdY.current.birdY < -10) {
+            birdY.current.dir = "down";
+          }
         }
-        if (birdY.current.birdY < -10) {
-          birdY.current.dir = "down";
-        }
+      } else {
+        birdY.current.birdY += birdY.current.velocity;
+        birdY.current.velocity += birdY.current.gravity;
       }
       pipes.forEach((pipe) => {
         pipe.topx -= 2;
@@ -210,6 +226,9 @@ function App() {
       // }
       requestAnimationFrame(() => animate(ctx, canva, vars, pipes));
     }
+    return () => {
+      boxC!.removeEventListener("click", handleclick);
+    };
   }, [canva, ctx, vars, pipes]);
 
   function generateRandomPairIn(): [number, number] {
