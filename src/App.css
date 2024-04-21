@@ -1,8 +1,6 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  display: flex;
+  height: 100vh;
 }
 .globe {
   display: block;
@@ -21,4 +19,30 @@
     color-mix(in oklch, blue, black 50%) 55%,
     transparent 70%
   );
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  align-items: center;
+  width: 100%;
+  padding: 5rem;
+}
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.tag {
+  font-size: 1.5rem;
+  color: darkblue;
+  background-color: lightblue;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+.box {
+  border: 2px solid white;
 }
