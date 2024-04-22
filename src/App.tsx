@@ -43,7 +43,7 @@ function App() {
     canvahight: 600,
     groundx: 0,
     Gap: 250,
-    speed: 4,
+    speed: 6,
     gameStatus: "start" as "start" | "playing" | "gameover",
   });
   const birdX = React.useRef<number>(0);
@@ -55,13 +55,13 @@ function App() {
     birdY: -5,
     dir: "down",
     velocity: 0,
-    gravity: 0.25, // Adjust this value to change gravity
+    gravity: 0.5, // Adjust this value to change gravity
   });
   const [pipes, setPipes] = useState<Array<Pipe>>([
     {
       topx: vars.Gap * 3,
       topy: 0,
-      toph: 250,
+      toph: 200,
       bottomx: vars.Gap * 3,
       bottomy: 350,
       bottomh: 200,
@@ -69,17 +69,17 @@ function App() {
     {
       topx: 4 * vars.Gap,
       topy: 0,
-      toph: 250,
+      toph: 180,
       bottomx: 4 * vars.Gap,
-      bottomy: 350,
+      bottomy: 320,
       bottomh: 200,
     },
     {
       topx: vars.Gap * 5,
       topy: 0,
-      toph: 250,
+      toph: 100,
       bottomx: vars.Gap * 5,
-      bottomy: 350,
+      bottomy: 280,
       bottomh: 200,
     },
   ]);
@@ -100,9 +100,13 @@ function App() {
         ) {
           frameCount.current = 0;
           birdY.current.birdY = -5;
+          birdY.current.velocity = 0;
+          birdY.current.gravity = 0.5;
+
           setVars({
             ...vars,
             gameStatus: "start",
+            speed: 6,
           });
           curentpipeindex.current = 0;
           frameCount.current = 0;
@@ -111,7 +115,7 @@ function App() {
             {
               topx: vars.Gap * 3,
               topy: 0,
-              toph: 250,
+              toph: 200,
               bottomx: vars.Gap * 3,
               bottomy: 350,
               bottomh: 200,
@@ -119,17 +123,17 @@ function App() {
             {
               topx: 4 * vars.Gap,
               topy: 0,
-              toph: 250,
+              toph: 180,
               bottomx: 4 * vars.Gap,
-              bottomy: 350,
+              bottomy: 320,
               bottomh: 200,
             },
             {
               topx: vars.Gap * 5,
               topy: 0,
-              toph: 250,
+              toph: 100,
               bottomx: vars.Gap * 5,
-              bottomy: 350,
+              bottomy: 280,
               bottomh: 200,
             },
           ]);
@@ -372,23 +376,27 @@ function App() {
 
       const pipe = pipes[curentpipeindex.current];
 
-      if (
-        vars.canvahight / 2 - 24 + birdY.current.birdY < pipe.toph &&
-        Math.abs(vars.canvawith / 2 - 24 - pipe.topx) < 50
-      ) {
-        vars.gameStatus = "gameover";
-      }
-      if (
-        vars.canvahight / 2 - 24 + birdY.current.birdY + 40 > pipe.bottomy &&
-        Math.abs(vars.canvawith / 2 - 24 - pipe.bottomx) < 50
-      ) {
-        vars.gameStatus = "gameover";
-      }
+      // if (
+      //   vars.canvahight / 2 - 24 + birdY.current.birdY < pipe.toph &&
+      //   Math.abs(vars.canvawith / 2 - 24 - pipe.topx) < 50
+      // ) {
+      //   vars.gameStatus = "gameover";
+      // }
+      // if (
+      //   vars.canvahight / 2 - 24 + birdY.current.birdY + 40 > pipe.bottomy &&
+      //   Math.abs(vars.canvawith / 2 - 24 - pipe.bottomx) < 50
+      // ) {
+      //   vars.gameStatus = "gameover";
+      // }
 
       if (vars.canvawith / 2 - 24 - pipe.topx - 50 > 0) {
         score.current!.score++;
         if (score.current!.score > score.current!.bestScore) {
           score.current!.bestScore = score.current!.score;
+        }
+        if (score.current!.score % 5 === 0) {
+          vars.speed += 0.5;
+          birdY.current.gravity += 0.1;
         }
         curentpipeindex.current = (curentpipeindex.current + 1) % pipes.length;
       }
