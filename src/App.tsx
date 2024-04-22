@@ -374,20 +374,18 @@ function App() {
 
       if (
         vars.canvahight / 2 - 24 + birdY.current.birdY < pipe.toph &&
-        vars.canvawith / 2 - 24 + 48 > pipe.topx &&
-        vars.canvawith / 2 - 24 + 48 < pipe.topx + 50
+        Math.abs(vars.canvawith / 2 - 24 - pipe.topx) < 50
       ) {
         vars.gameStatus = "gameover";
       }
       if (
         vars.canvahight / 2 - 24 + birdY.current.birdY + 40 > pipe.bottomy &&
-        vars.canvawith / 2 - 24 + 48 > pipe.bottomx &&
-        vars.canvawith / 2 - 24 < pipe.bottomx + 50
+        Math.abs(vars.canvawith / 2 - 24 - pipe.bottomx) < 50
       ) {
         vars.gameStatus = "gameover";
       }
 
-      if (vars.canvawith / 2 - 24 + 48 > pipe.topx + 50) {
+      if (vars.canvawith / 2 - 24 - pipe.topx - 50 > 0) {
         score.current!.score++;
         if (score.current!.score > score.current!.bestScore) {
           score.current!.bestScore = score.current!.score;
